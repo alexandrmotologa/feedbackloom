@@ -1,0 +1,29 @@
+[
+  {
+    "id": "hs_101",
+    "name": "Cyberdyne Systems",
+    "domain": "cyberdyne.com",
+    "arr_usd": 285000,
+    "plan_tier": "ENTERPRISE",
+    "renewal_date": "2026-12-25",
+    "churn_risk_score": 0.75
+  },
+  {
+    "id": "hs_102",
+    "name": "Stark Industries AI",
+    "domain": "stark.tech",
+    "arr_usd": 320000,
+    "plan_tier": "ENTERPRISE",
+    "renewal_date": "2027-04-10",
+    "churn_risk_score": 0.20
+  },
+  {
+    "id": "hs_103",
+    "name": "Acme Global Tech",
+    "domain": "acme.com",
+    "arr_usd": 195000,
+    "plan_tier": "ENTERPRISE",
+    "renewal_date": "2027-01-15",
+    "churn_risk_score": 0.60
+  }
+]

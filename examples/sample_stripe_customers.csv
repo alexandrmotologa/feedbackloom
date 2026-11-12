@@ -1,0 +1,13 @@
+id,name,domain,arr_usd,plan_tier,renewal_date,churn_risk_score
+acc_cyberdyne,Cyberdyne Systems,cyberdyne.com,285000,ENTERPRISE,2026-12-25,0.75
+acc_acme,Acme Global Tech,acme.com,195000,ENTERPRISE,2027-01-15,0.60
+acc_globex,Globex Corporation,globex.corp,160000,ENTERPRISE,2026-12-01,0.85
+acc_soylent,Soylent Financial Corp,soylent.io,145000,ENTERPRISE,2027-02-20,0.35
+acc_massivedynamic,Massive Dynamic Labs,massivedynamic.org,110000,ENTERPRISE,2026-12-15,0.70
+acc_initech,Initech Software,initech.com,48000,GROWTH,2027-03-22,0.30
+acc_stark,Stark Industries AI,stark.tech,320000,ENTERPRISE,2027-04-10,0.20
+acc_wayne,Wayne Security Ops,waynesec.com,225000,ENTERPRISE,2026-12-08,0.80
+acc_umbrella,Umbrella Health,umbrella.bio,38000,GROWTH,2027-05-18,0.25
+acc_piedpiper,Pied Piper Storage,piedpiper.com,28000,GROWTH,2027-01-30,0.45
+acc_hooli,Hooli Cloud,hooli.xyz,175000,ENTERPRISE,2026-12-20,0.65
+acc_dundermifflin,Dunder Mifflin Direct,dundermifflin.com,7500,STARTER,2027-07-01,0.15
