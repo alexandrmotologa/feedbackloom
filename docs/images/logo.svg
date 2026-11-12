@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="squircle-clip">
+      <rect x="24" y="24" width="976" height="976" rx="220" />
+    </clipPath>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="cyan-optics" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <linearGradient id="gold-beak-l" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+
+    <linearGradient id="gold-beak-r" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#090d16" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Luxury White Squircle Container -->
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="#ffffff" stroke="#e2e8f0" stroke-width="6" />
+
+  <g clip-path="url(#squircle-clip)">
+    <g transform="translate(512, 512)" filter="url(#subtle-shadow)">
+
+      <!-- Hexagonal Architectural Gateway Frame -->
+      <polygon points="
+        0,-390
+        338,-195
+        338,195
+        0,390
+        -338,195
+        -338,-195
+      " fill="none" stroke="#0f172a" stroke-width="36" stroke-linejoin="round" />
+
+      <!-- Inner Precision Cyan Alignment Ring -->
+      <polygon points="
+        0,-355
+        307,-177
+        307,177
+        0,355
+        -307,177
+        -307,-177
+      " fill="none" stroke="#00f5ff" stroke-width="3.5" opacity="0.45" stroke-dasharray="16, 12" />
+
+      <!-- ======================================================== -->
+      <!-- THE LOOM OWL: Master Origami Mascot (85% Mass Proportion) -->
+      <!-- ======================================================== -->
+
+      <!-- 1. 100% Watertight Solid Base Silhouette (Zero-Leak Rule) -->
+      <path d="
+        M 0,-215
+        L 65,-275 L 140,-325 L 170,-260 L 225,-165 L 255,-60
+        L 270,75 L 250,210 L 205,290 L 120,345 L 0,360
+        L -120,345 L -205,290 L -250,210 L -270,75 L -255,-60
+        L -225,-165 L -170,-260 L -140,-325 L -65,-275
+        Z
+      " fill="#080c14" />
+
+      <!-- 2. Outer Ear Tuft Facets -->
+      <!-- Left Outer Tuft -->
+      <polygon points="-140,-325 -65,-275 -105,-220 -170,-260" fill="#1e293b" />
+      <polygon points="-170,-260 -105,-220 -155,-175 -225,-165" fill="#0f172a" />
+      <polygon points="-140,-325 -170,-260 -105,-220" fill="#334155" />
+      <!-- Right Outer Tuft -->
+      <polygon points="140,-325 65,-275 105,-220 170,-260" fill="#334155" />
+      <polygon points="170,-260 105,-220 155,-175 225,-165" fill="#1e293b" />
+      <polygon points="140,-325 170,-260 105,-220" fill="#475569" />
+
+      <!-- Head Crown Central Saddle -->
+      <polygon points="0,-215 -65,-275 -105,-220 0,-155" fill="#0f172a" />
+      <polygon points="0,-215 65,-275 105,-220 0,-155" fill="#1e293b" />
+
+      <!-- 3. Upper Brow & Facial Disc Framework -->
+      <!-- Forehead Keystone -->
+      <polygon points="0,-155 -70,-145 0,-85" fill="#1e293b" />
+      <polygon points="0,-155 70,-145 0,-85" fill="#334155" />
+
+      <!-- Supraorbital Brow Plates -->
+      <polygon points="-70,-145 -105,-220 -155,-175 -145,-110" fill="#1e293b" />
+      <polygon points="70,-145 105,-220 155,-175 145,-110" fill="#334155" />
+      <polygon points="-70,-145 -145,-110 0,-85" fill="#0f172a" />
+      <polygon points="70,-145 145,-110 0,-85" fill="#1e293b" />
+
+      <!-- Outer Cheek Temporal Wings -->
+      <polygon points="-225,-165 -155,-175 -145,-110 -220,-85" fill="#111827" />
+      <polygon points="225,-165 155,-175 145,-110 220,-85" fill="#1e293b" />
+      <polygon points="-220,-85 -145,-110 -155,-35 -245,-15" fill="#1e293b" />
+      <polygon points="220,-85 145,-110 155,-35 245,-15" fill="#334155" />
+
+      <!-- 4. Deep Eye Sockets (Obsidian Recess) -->
+      <polygon points="-145,-110 -55,-100 -40,-65 -85,-55 -150,-70" fill="#030712" />
+      <polygon points="145,-110 55,-100 40,-65 85,-55 150,-70" fill="#030712" />
+
+      <!-- 5. Predatory Optics (Sharp Slanted Almond Lenses - Authentic Raptor Cant) -->
+      <!-- Left Eye -->
+      <polygon points="-135,-95 -75,-88 -50,-68 -90,-62 -140,-78" fill="url(#cyan-optics)" />
+      <polygon points="-120,-88 -78,-82 -62,-70 -92,-66 -124,-76" fill="#00f5ff" />
+      <!-- Left Pupil Slit -->
+      <polygon points="-94,-84 -82,-82 -86,-68 -98,-70" fill="#031c33" />
+      <circle cx="-88" cy="-76" r="3" fill="#ffffff" opacity="0.9" />
+
+      <!-- Right Eye -->
+      <polygon points="135,-95 75,-88 50,-68 90,-62 140,-78" fill="url(#cyan-optics)" />
+      <polygon points="120,-88 78,-82 62,-70 92,-66 124,-76" fill="#00f5ff" />
+      <!-- Right Pupil Slit -->
+      <polygon points="94,-84 82,-82 86,-68 98,-70" fill="#031c33" />
+      <circle cx="88" cy="-76" r="3" fill="#ffffff" opacity="0.9" />
+
+      <!-- 6. Nasal Bridge & Geometric Raptor Beak -->
+      <!-- Bridge -->
+      <polygon points="0,-85 -30,-45 0,-15" fill="#1e293b" />
+      <polygon points="0,-85 30,-45 0,-15" fill="#334155" />
+
+      <!-- Sharp Raptor Beak (Gold/Amber Accent) -->
+      <polygon points="0,-15 -20,25 0,72" fill="url(#gold-beak-l)" />
+      <polygon points="0,-15 20,25 0,72" fill="url(#gold-beak-r)" />
+      <!-- Beak Culmen Ridge -->
+      <line x1="0" y1="-15" x2="0" y2="72" stroke="#fef08a" stroke-width="2" opacity="0.8" />
+
+      <!-- 7. Sub-Ocular Cheek Flanges & Whisker Facets -->
+      <polygon points="-40,-65 0,-15 -20,25 -65,30 -105,-15" fill="#1e293b" />
+      <polygon points="40,-65 0,-15 20,25 65,30 105,-15" fill="#334155" />
+      <polygon points="-105,-15 -155,-35 -185,45 -115,55 -65,30" fill="#0f172a" />
+      <polygon points="105,-15 155,-35 185,45 115,55 65,30" fill="#1e293b" />
+
+      <!-- 8. Interlocking Loom Warp & Weft Breastplate (Product Synthesis Matrix) -->
+      <!-- Central Loom Diamond Core -->
+      <polygon points="0,95 -60,155 0,225 60,155" fill="#0f172a" stroke="#00f5ff" stroke-width="2" opacity="0.95" />
+      <polygon points="0,95 0,225 60,155" fill="#1e293b" />
+      <polygon points="0,95 0,225 -60,155" fill="#0b1329" />
+      <!-- Inner Pulse Core Dot -->
+      <polygon points="0,135 -20,155 0,175 20,155" fill="#00f5ff" />
+
+      <!-- Lateral Interwoven Loom Strands -->
+      <!-- Left Loom Strands -->
+      <polygon points="-20,25 -65,30 -115,55 -55,105 0,95" fill="#334155" />
+      <polygon points="-115,55 -185,45 -195,125 -125,135 -55,105" fill="#1e293b" />
+      <polygon points="-125,135 -195,125 -205,210 -130,205 -60,155" fill="#0f172a" />
+      <polygon points="-130,205 -205,210 -170,275 -95,260 0,225" fill="#1e293b" />
+      <!-- Right Loom Strands -->
+      <polygon points="20,25 65,30 115,55 55,105 0,95" fill="#475569" />
+      <polygon points="115,55 185,45 195,125 125,135 55,105" fill="#334155" />
+      <polygon points="125,135 195,125 205,210 130,205 60,155" fill="#1e293b" />
+      <polygon points="130,205 205,210 170,275 95,260 0,225" fill="#334155" />
+
+      <!-- 9. Mantle Outer Wing Blades (Folded Precision) -->
+      <!-- Left Outer Wing -->
+      <polygon points="-245,-15 -185,45 -195,125 -265,95 -255,-60" fill="#0f172a" />
+      <polygon points="-265,95 -195,125 -205,210 -250,210" fill="#1e293b" />
+      <polygon points="-250,210 -205,210 -170,275 -205,290" fill="#0f172a" />
+      <!-- Right Outer Wing -->
+      <polygon points="245,-15 185,45 195,125 265,95 255,-60" fill="#1e293b" />
+      <polygon points="265,95 195,125 205,210 250,210" fill="#334155" />
+      <polygon points="250,210 205,210 170,275 205,290" fill="#1e293b" />
+
+      <!-- 10. Lower Tail & Perch Convergence (Grounded Base) -->
+      <polygon points="0,225 -95,260 -75,325 0,345" fill="#0f172a" />
+      <polygon points="0,225 95,260 75,325 0,345" fill="#1e293b" />
+      <polygon points="-95,260 -170,275 -120,345 -75,325" fill="#0b0f19" />
+      <polygon points="95,260 170,275 120,345 75,325" fill="#0f172a" />
+      <polygon points="0,345 -75,325 -45,355 0,358" fill="#1e293b" />
+      <polygon points="0,345 75,325 45,355 0,358" fill="#334155" />
+
+      <!-- Fine Precision Seam: Vertical Symmetrical Micro-Pinstripe -->
+      <line x1="0" y1="-215" x2="0" y2="-85" stroke="#38bdf8" stroke-width="1.5" opacity="0.5" />
+      <line x1="0" y1="225" x2="0" y2="358" stroke="#38bdf8" stroke-width="1.5" opacity="0.3" />
+
+    </g>
+  </g>
+</svg>

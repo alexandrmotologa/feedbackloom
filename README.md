@@ -1,8 +1,30 @@
-# feedbackloom
+<p align="center">
+  <img src="docs/images/logo.png?raw=true" alt="feedbackloom Logo" width="130" style="border-radius: 24px;" />
+</p>
 
-Autonomous Customer Voice and ARR-Weighted Feature Request Synthesizer.
+<h1 align="center">feedbackloom</h1>
 
-feedbackloom ingests noisy customer feedback across support tickets, sales transcripts, and community channels, clusters them by semantic similarity using HDBSCAN, weights each opportunity by customer contract value (ARR) and renewal urgency, and drafts developer-ready Product Requirements Documents (PRDs) with verified customer evidence quotes.
+<p align="center">
+  <b>Autonomous Customer Voice and ARR-Weighted Feature Request Synthesizer</b><br>
+  <i>From chaotic multi-channel feedback to revenue-ranked PRD specifications with verified customer quotes.</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-Go_1.24-00ADD8?style=flat-square&logo=go" alt="Go" />
+  <img src="https://img.shields.io/badge/Frontend-React_19_+_TypeScript-3178C6?style=flat-square&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/Database-SQLite_WAL-003B57?style=flat-square&logo=sqlite" alt="SQLite" />
+  <img src="https://img.shields.io/badge/Clustering-HDBSCAN_(Pure_Go)-10B981?style=flat-square" alt="HDBSCAN" />
+  <img src="https://img.shields.io/badge/Styling-Tailwind_CSS_v4-38BDF8?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square" alt="License" />
+</p>
+
+<p align="center">
+  <img src="docs/images/feedbackloom_demo.gif?raw=true" alt="feedbackloom Interactive Demo" width="900" style="border-radius: 12px; border: 1px solid #1e293b;" />
+</p>
+
+## Overview
+
+feedbackloom ingests customer feedback across support tickets, sales transcripts, and community channels, clusters items by semantic similarity using pure Go HDBSCAN, weights each opportunity by customer contract value (ARR) and renewal proximity, and drafts developer-ready Product Requirements Documents (PRDs) with verified customer evidence quotes.
 
 ## Key Capabilities
 
@@ -10,13 +32,50 @@ feedbackloom ingests noisy customer feedback across support tickets, sales trans
 - **CRM and Revenue Attribution**: Connects customer email domains to Stripe subscriptions and HubSpot deals, pulling Annual Recurring Revenue (ARR), contract renewal dates, and churn risk scores.
 - **Pure Go HDBSCAN Clustering**: Executes density-based spatial clustering over 128-dimensional dense vectors with zero Python runtime dependencies or external API costs. Granularity can be adjusted dynamically (Macro, Balanced, Micro).
 - **Competitor Loss Attribution**: Identifies competitor mentions (such as Okta, Auth0, Splunk, Datadog) in feedback text and tallies Lost Pipeline ARR to expose immediate churn risks to named platforms.
-- **ROI Index & Engineering Effort**: Links opportunity ARR to two-week engineering sprint allocations, providing an immediate ARR-per-sprint capital efficiency rating.
+- **ROI Index and Engineering Effort**: Links opportunity ARR to two-week engineering sprint allocations, providing an immediate ARR-per-sprint capital efficiency rating.
 - **Interactive Ingestion Sandbox**: Real-time playground to test incoming customer quotes against the NLP pipeline, inspecting domain matching, sentiment/urgency, and nearest cluster cosine distance.
 - **Autonomous PRD Synthesis**: Generates complete Product Requirements Documents in Markdown and Notion format, including user stories, Gherkin acceptance criteria, and verbatim customer quotes with ARR badges.
-- **Bidirectional GitHub & Jira Exporters**: Formats PRDs into structured GitHub Issue payloads (with acceptance checklists and labels) and Jira Epic payloads for instant engineering handoff.
+- **Bidirectional GitHub and Jira Exporters**: Formats PRDs into structured GitHub Issue payloads (with acceptance checklists and labels) and Jira Epic payloads for instant engineering handoff.
 - **Renewal Danger Alerting**: Highlights opportunities demanded by high-value accounts facing renewals within 45 days.
 - **Closed-Loop Customer Updates**: Drafts personalized notifications quoting the customer's original words when a feature transitions to shipped status.
 - **Single Self-Contained Binary**: Packages the Go API daemon, SQLite WAL database, and React 19 Product Studio into a single binary requiring less than 25MB of RAM.
+
+## Authentic Software Execution
+
+### 1. Revenue Opportunities Waterfall & Competitor Loss Matrix
+Live dashboard showing real-time portfolio coverage ($1.59M demanded ARR / 91.6% coverage), competitor churn attribution (Okta, Azure AD, Splunk, Datadog), and critical renewal alerts.
+
+<p align="center">
+  <img src="docs/images/feedbackloom_dashboard.png?raw=true" alt="feedbackloom Opportunities Dashboard" width="900" style="border-radius: 10px; border: 1px solid #1e293b;" />
+</p>
+
+### 2. Interactive Ingestion Sandbox & Real-Time Cosine Matching
+Live payload tester demonstrating domain resolution against Stripe accounts, entity extraction, competitor detection, and cosine similarity matching (96.1% match against existing cluster).
+
+<p align="center">
+  <img src="docs/images/feedbackloom_sandbox.png?raw=true" alt="feedbackloom Ingestion Sandbox" width="900" style="border-radius: 10px; border: 1px solid #1e293b;" />
+</p>
+
+### 3. Autonomous PRD Studio with Customer Evidence Quotes
+Complete Product Requirements Document with executive business context, problem statements, customer evidence quotes linked to ARR, and one-click export to GitHub Issues and Jira Epics.
+
+<p align="center">
+  <img src="docs/images/feedbackloom_prd_studio.png?raw=true" alt="feedbackloom PRD Studio" width="900" style="border-radius: 10px; border: 1px solid #1e293b;" />
+</p>
+
+### 4. Multi-Channel Data Connectors & Inbound Webhook Endpoints
+Native connectors for Stripe Billing, HubSpot CRM, and incoming webhook triggers for Zendesk, Intercom, Gong, and Slack.
+
+<p align="center">
+  <img src="docs/images/feedbackloom_connectors.png?raw=true" alt="feedbackloom Data Connectors" width="900" style="border-radius: 10px; border: 1px solid #1e293b;" />
+</p>
+
+### 5. Multi-Device Adaptability & Responsive Design
+Full mobile and tablet viewport adaptability with collapsible cards, touch-friendly navigation, and responsive financial metrics.
+
+<p align="center">
+  <img src="docs/images/feedbackloom_mobile.png?raw=true" alt="feedbackloom Mobile Responsive Layout" width="360" style="border-radius: 16px; border: 1px solid #1e293b;" />
+</p>
 
 ## System Architecture
 
@@ -179,11 +238,11 @@ Open `http://localhost:8080` in your browser to access the embedded Product Stud
 
 ## Technical Specifications
 
-- **Language**: Go 1.27
+- **Language**: Go 1.24
 - **Database**: SQLite with Write-Ahead Logging (WAL) mode via `modernc.org/sqlite` (pure Go, zero CGO)
 - **Vector Embeddings**: 128-dimensional dense vectorizer with L2 normalization
 - **Clustering Algorithm**: HDBSCAN with Prim's Minimum Spanning Tree ($O(N^2)$)
-- **Web Frontend**: React 19, TypeScript, Vite, Tailwind CSS (embedded directly into Go binary)
+- **Web Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4 (embedded directly into Go binary)
 - **Binary Size**: ~12MB single static executable with zero external dependencies
 - **Memory Footprint**: < 25MB RAM under active load
 
