@@ -68,13 +68,14 @@ func (p *Pipeline) Run(ctx context.Context, opts PipelineOptions) (*PipelineSumm
 	// 2. Extract pain points & outcomes if missing
 	for i := range items {
 		it := &items[i]
-		if it.ExtractedPainPoint == "" || it.UrgencyScore == 0.0 {
+		if it.ExtractedPainPoint == "" || it.UrgencyScore == 0.0 || len(it.CompetitorMentions) == 0 {
 			res := p.extractor.Extract(ctx, it.RawText)
 			it.ExtractedPainPoint = res.PainPoint
 			it.ExtractedOutcome = res.DesiredOutcome
 			it.SentimentScore = res.SentimentScore
 			it.UrgencyScore = res.UrgencyScore
-			_ = p.store.UpdateFeedbackExtraction(ctx, it.ID, res.PainPoint, res.DesiredOutcome, res.SentimentScore, res.UrgencyScore)
+			it.CompetitorMentions = res.CompetitorMentions
+			_ = p.store.UpdateFeedbackExtraction(ctx, it.ID, res.PainPoint, res.DesiredOutcome, res.SentimentScore, res.UrgencyScore, res.CompetitorMentions)
 		}
 
 		// Ensure account ID is mapped if missing
@@ -165,15 +166,21 @@ func (p *Pipeline) Run(ctx context.Context, opts PipelineOptions) (*PipelineSumm
 
 		oppID := fmt.Sprintf("opp_%s", uuid.New().String()[:8])
 		opp := &models.Opportunity{
-			ID:            oppID,
-			Title:         theme.Title,
-			Description:   theme.Description,
-			Category:      theme.Category,
-			TotalARRUSD:   metrics.TotalARRUSD,
-			WeightedScore: metrics.WeightedScore,
-			AccountCount:  metrics.AccountCount,
-			FeedbackCount: metrics.FeedbackCount,
-			Status:        models.StatusDiscovered,
+			ID:                 oppID,
+			Title:              theme.Title,
+			Description:        theme.Description,
+			Category:           theme.Category,
+			TotalARRUSD:        metrics.TotalARRUSD,
+			WeightedScore:      metrics.WeightedScore,
+			AccountCount:       metrics.AccountCount,
+			FeedbackCount:      metrics.FeedbackCount,
+			Status:             models.StatusDiscovered,
+			CompetitorMentions: metrics.CompetitorMentions,
+			LostPipelineARR:    metrics.LostPipelineARR,
+			EffortSprints:      metrics.EffortSprints,
+			ROIIndex:           metrics.ROIIndex,
+			UrgentRenewalAlert: metrics.UrgentRenewalAlert,
+			VelocityGrowthPct:  metrics.VelocityGrowthPct,
 		}
 
 		if err := p.store.UpsertOpportunity(ctx, opp); err != nil {

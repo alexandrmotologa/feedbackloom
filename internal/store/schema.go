@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS feedback_items (
     extracted_outcome TEXT,
     sentiment_score REAL DEFAULT 0.0,
     urgency_score REAL DEFAULT 0.0,
+    competitor_mentions TEXT DEFAULT '[]',
     embedding BLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -47,6 +48,12 @@ CREATE TABLE IF NOT EXISTS opportunities (
     account_count INTEGER NOT NULL DEFAULT 0,
     feedback_count INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'DISCOVERED',
+    competitor_mentions TEXT DEFAULT '[]',
+    lost_pipeline_arr REAL DEFAULT 0.0,
+    effort_sprints INTEGER DEFAULT 2,
+    roi_index REAL DEFAULT 0.0,
+    urgent_renewal_alert INTEGER DEFAULT 0,
+    velocity_growth_pct REAL DEFAULT 0.0,
     generated_prd_markdown TEXT,
     generated_prd_notion_json TEXT,
     shipped_at TIMESTAMP,

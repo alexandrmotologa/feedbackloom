@@ -11,6 +11,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ stats, activeTab, setActiveTab, onRefresh }) => {
   const tabs = [
     { id: 'opportunities', label: 'ARR Opportunities', icon: '⚡' },
+    { id: 'sandbox', label: 'Live Ingestion Sandbox', icon: '🔬' },
     { id: 'prd-studio', label: 'PRD Studio', icon: '📄' },
     { id: 'evidence', label: 'Evidence Stream', icon: '💬' },
     { id: 'connectors', label: 'Data Connectors', icon: '🔌' },
@@ -47,11 +48,20 @@ export const Header: React.FC<HeaderProps> = ({ stats, activeTab, setActiveTab, 
 
           {/* Real-time KPI Ribbon */}
           {stats && (
-            <div className="hidden lg:flex items-center gap-6 text-xs bg-[#121826] px-4 py-1.5 rounded-lg border border-[#1e293b]">
+            <div className="hidden lg:flex items-center gap-5 text-xs bg-[#121826] px-4 py-1.5 rounded-lg border border-[#1e293b]">
               <div>
                 <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Demanded ARR</span>
                 <span className="font-bold text-emerald-400 font-mono">{formatCurrency(stats.total_demanded_arr_usd)}</span>
               </div>
+              {stats.total_lost_pipeline_arr_usd ? (
+                <>
+                  <div className="h-6 w-px bg-[#1e293b]" />
+                  <div>
+                    <span className="text-rose-400/80 block text-[10px] uppercase font-semibold">Pipeline at Risk</span>
+                    <span className="font-bold text-rose-400 font-mono">{formatCurrency(stats.total_lost_pipeline_arr_usd)}</span>
+                  </div>
+                </>
+              ) : null}
               <div className="h-6 w-px bg-[#1e293b]" />
               <div>
                 <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Portfolio ARR</span>
@@ -64,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ stats, activeTab, setActiveTab, 
               </div>
               <div className="h-6 w-px bg-[#1e293b]" />
               <div>
-                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Feedback Items</span>
+                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Feedback</span>
                 <span className="font-semibold text-purple-400 font-mono">{stats.total_feedback}</span>
               </div>
             </div>
@@ -82,14 +92,14 @@ export const Header: React.FC<HeaderProps> = ({ stats, activeTab, setActiveTab, 
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="flex space-x-1 border-t border-[#1e293b]/50 pt-1 -mb-px">
+        <nav className="flex space-x-1 border-t border-[#1e293b]/50 pt-1 -mb-px overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-medium border-b-2 transition-all ${
+                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-medium border-b-2 whitespace-nowrap transition-all ${
                   isActive
                     ? 'border-blue-500 text-white bg-blue-500/10'
                     : 'border-transparent text-[#94a3b8] hover:text-white hover:bg-slate-800/40'

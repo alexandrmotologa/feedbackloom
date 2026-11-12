@@ -1,4 +1,15 @@
-import { Account, DashboardStats, EnrichedFeedbackItem, FeedbackItem, Opportunity, ClosedLoopNotification } from './types'
+import {
+  Account,
+  DashboardStats,
+  EnrichedFeedbackItem,
+  FeedbackItem,
+  Opportunity,
+  ClosedLoopNotification,
+  LiveIngestRequest,
+  LiveIngestResponse,
+  GitHubIssuePayload,
+  JiraEpicPayload,
+} from './types'
 
 const BASE_URL = '/api/v1'
 
@@ -34,8 +45,15 @@ export async function seedDemoFeedback(): Promise<{ seeded: number; message: str
   return res.json()
 }
 
-export async function runClustering(): Promise<any> {
-  const res = await fetch(`${BASE_URL}/cluster/run`, { method: 'POST' })
+export async function runClustering(minClusterSize?: number, minPoints?: number): Promise<any> {
+  let url = `${BASE_URL}/cluster/run`
+  const params = new URLSearchParams()
+  if (minClusterSize) params.set('min_cluster_size', String(minClusterSize))
+  if (minPoints) params.set('min_points', String(minPoints))
+  if (params.toString()) {
+    url += `?${params.toString()}`
+  }
+  const res = await fetch(url, { method: 'POST' })
   if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to run clustering`)
   return res.json()
 }
@@ -65,6 +83,28 @@ export async function exportToNotion(id: string): Promise<{ url: string; message
   return res.json()
 }
 
+export async function fetchGitHubIssue(id: string): Promise<GitHubIssuePayload> {
+  const res = await fetch(`${BASE_URL}/opportunities/${id}/export-github`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to generate GitHub Issue`)
+  return res.json()
+}
+
+export async function fetchJiraEpic(id: string): Promise<JiraEpicPayload> {
+  const res = await fetch(`${BASE_URL}/opportunities/${id}/export-jira`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to generate Jira Epic`)
+  return res.json()
+}
+
+export async function updateOpportunityEffort(id: string, effortSprints: number): Promise<Opportunity> {
+  const res = await fetch(`${BASE_URL}/opportunities/${id}/effort`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ effort_sprints: effortSprints }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update effort`)
+  return res.json()
+}
+
 export async function updateOpportunityStatus(id: string, status: string): Promise<{ status: string }> {
   const res = await fetch(`${BASE_URL}/opportunities/${id}/status`, {
     method: 'PATCH',
@@ -72,6 +112,16 @@ export async function updateOpportunityStatus(id: string, status: string): Promi
     body: JSON.stringify({ status }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update status`)
+  return res.json()
+}
+
+export async function testLiveIngest(payload: LiveIngestRequest): Promise<LiveIngestResponse> {
+  const res = await fetch(`${BASE_URL}/ingest/test-live`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to execute live ingest test`)
   return res.json()
 }
 

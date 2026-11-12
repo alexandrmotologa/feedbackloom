@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +25,8 @@ type Server struct {
 	cfg        *config.Config
 	store      *store.Store
 	resolver   *crm.Resolver
+	vectorizer cluster.Vectorizer
+	extractor  *cluster.FeedbackExtractor
 	pipeline   *cluster.Pipeline
 	prdGen     *prd.PRDGenerator
 	mux        *http.ServeMux
@@ -39,12 +42,14 @@ func NewServer(cfg *config.Config, s *store.Store, webFS http.FileSystem) *Serve
 	prdGen := prd.NewPRDGenerator()
 
 	srv := &Server{
-		cfg:      cfg,
-		store:    s,
-		resolver: resolver,
-		pipeline: pipeline,
-		prdGen:   prdGen,
-		mux:      http.NewServeMux(),
+		cfg:        cfg,
+		store:      s,
+		resolver:   resolver,
+		vectorizer: vec,
+		extractor:  ext,
+		pipeline:   pipeline,
+		prdGen:     prdGen,
+		mux:        http.NewServeMux(),
 	}
 
 	if webFS != nil {
@@ -84,6 +89,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("/api/v1/feedback/seed", s.handleSeedFeedback)
 	s.mux.HandleFunc("/api/v1/ingest/csv", s.handleIngestCSV)
 	s.mux.HandleFunc("/api/v1/ingest/json", s.handleIngestJSON)
+	s.mux.HandleFunc("/api/v1/ingest/test-live", s.handleLiveIngestTest)
 	s.mux.HandleFunc("/api/v1/ingest/zendesk", s.handleIngestZendesk)
 	s.mux.HandleFunc("/api/v1/ingest/intercom", s.handleIngestIntercom)
 	s.mux.HandleFunc("/api/v1/ingest/gong", s.handleIngestGong)
@@ -259,6 +265,109 @@ func (s *Server) handleSeedFeedback(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleLiveIngestTest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		respondError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var req models.LiveIngestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.RawText == "" {
+		respondError(w, http.StatusBadRequest, "raw_text is required")
+		return
+	}
+
+	ctx := r.Context()
+
+	// 1. Resolve Account & ARR
+	var acc *models.Account
+	if req.CustomerEmail != "" {
+		acc, _ = s.resolver.ResolveAccount(ctx, req.CustomerEmail)
+	}
+
+	// 2. Extract NLP entities, urgency, competitors
+	extraction := s.extractor.Extract(ctx, req.RawText)
+
+	// 3. Generate dense vector
+	textToEmbed := req.RawText + " " + extraction.PainPoint + " " + extraction.DesiredOutcome
+	emb, _ := s.vectorizer.Embed(ctx, textToEmbed)
+
+	// 4. Find most similar existing opportunity
+	opps, _ := s.store.ListOpportunities(ctx)
+	var bestOppID, bestOppTitle string
+	var highestSimilarity float64 = 0.0
+
+	for _, opp := range opps {
+		// Compare against quotes in that opportunity
+		quotes, err := s.store.ListEnrichedFeedbackForOpportunity(ctx, opp.ID)
+		if err == nil {
+			for _, q := range quotes {
+				if len(q.Embedding) > 0 && len(emb) > 0 {
+					dist := cluster.CosineDistance(emb, q.Embedding)
+					sim := 1.0 - (dist / 2.0)
+					if sim > highestSimilarity {
+						highestSimilarity = sim
+						bestOppID = opp.ID
+						bestOppTitle = opp.Title
+					}
+				}
+			}
+		}
+	}
+
+	resp := models.LiveIngestResponse{
+		Account:                 acc,
+		ExtractedPainPoint:      extraction.PainPoint,
+		ExtractedOutcome:        extraction.DesiredOutcome,
+		Category:                extraction.Category,
+		UrgencyScore:            extraction.UrgencyScore,
+		SentimentScore:          extraction.SentimentScore,
+		CompetitorMentions:      extraction.CompetitorMentions,
+		MatchedOpportunityID:    bestOppID,
+		MatchedOpportunityTitle: bestOppTitle,
+		SimilarityScore:         highestSimilarity,
+	}
+
+	// 5. If Commit requested, persist
+	if req.Commit {
+		accID := ""
+		if acc != nil {
+			accID = acc.ID
+		}
+		source := req.Source
+		if source == "" {
+			source = models.SourceAPI
+		}
+		itemID := fmt.Sprintf("live_%s", uuid.New().String()[:8])
+		item := &models.FeedbackItem{
+			ID:                 itemID,
+			Source:             strings.ToUpper(source),
+			AccountID:          accID,
+			CustomerEmail:      req.CustomerEmail,
+			CustomerName:       req.CustomerName,
+			RawText:            req.RawText,
+			ExtractedPainPoint: extraction.PainPoint,
+			ExtractedOutcome:   extraction.DesiredOutcome,
+			SentimentScore:     extraction.SentimentScore,
+			UrgencyScore:       extraction.UrgencyScore,
+			CompetitorMentions: extraction.CompetitorMentions,
+			Embedding:          emb,
+			CreatedAt:          time.Now().UTC(),
+		}
+		_ = s.store.InsertFeedbackItem(ctx, item)
+		if bestOppID != "" && highestSimilarity >= 0.70 {
+			_ = s.store.LinkFeedbackOpportunity(ctx, itemID, bestOppID, highestSimilarity)
+		}
+		resp.CreatedItemID = itemID
+	}
+
+	respondJSON(w, http.StatusOK, resp)
+}
+
 func (s *Server) handleIngestCSV(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		respondError(w, http.StatusMethodNotAllowed, "method not allowed")
@@ -338,7 +447,6 @@ func (s *Server) handleIngestGong(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleIngestSlack(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
-	// Handle Slack URL verification challenge if present
 	var challengeReq struct {
 		Challenge string `json:"challenge"`
 		Type      string `json:"type"`
@@ -363,9 +471,23 @@ func (s *Server) handleClusterRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	minClusterSize := s.cfg.MinClusterSize
+	minPoints := s.cfg.MinPoints
+
+	if val := r.URL.Query().Get("min_cluster_size"); val != "" {
+		if i, err := strconv.Atoi(val); err == nil && i >= 2 {
+			minClusterSize = i
+		}
+	}
+	if val := r.URL.Query().Get("min_points"); val != "" {
+		if i, err := strconv.Atoi(val); err == nil && i >= 2 {
+			minPoints = i
+		}
+	}
+
 	opts := cluster.PipelineOptions{
-		MinClusterSize: s.cfg.MinClusterSize,
-		MinPoints:      s.cfg.MinPoints,
+		MinClusterSize: minClusterSize,
+		MinPoints:      minPoints,
 	}
 
 	summary, err := s.pipeline.Run(r.Context(), opts)
@@ -423,7 +545,6 @@ func (s *Server) handleOpportunityDetail(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	// Sub-actions: /prd, /export-notion, /status, /notifications
 	action := parts[1]
 	switch action {
 	case "prd":
@@ -450,6 +571,50 @@ func (s *Server) handleOpportunityDetail(w http.ResponseWriter, r *http.Request)
 				"markdown":    md,
 				"notion_json": notionJSON,
 			})
+			return
+		}
+
+	case "export-github":
+		if r.Method == http.MethodGet || r.Method == http.MethodPost {
+			opp, err := s.store.GetOpportunityByID(ctx, oppID)
+			if err != nil {
+				respondError(w, http.StatusNotFound, "opportunity not found")
+				return
+			}
+			quotes, _ := s.store.ListEnrichedFeedbackForOpportunity(ctx, oppID)
+			payload := prd.GenerateGitHubIssue(opp, quotes)
+			respondJSON(w, http.StatusOK, payload)
+			return
+		}
+
+	case "export-jira":
+		if r.Method == http.MethodGet || r.Method == http.MethodPost {
+			opp, err := s.store.GetOpportunityByID(ctx, oppID)
+			if err != nil {
+				respondError(w, http.StatusNotFound, "opportunity not found")
+				return
+			}
+			quotes, _ := s.store.ListEnrichedFeedbackForOpportunity(ctx, oppID)
+			payload := prd.GenerateJiraEpic(opp, quotes)
+			respondJSON(w, http.StatusOK, payload)
+			return
+		}
+
+	case "effort":
+		if r.Method == http.MethodPatch {
+			var body struct {
+				EffortSprints int `json:"effort_sprints"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.EffortSprints <= 0 {
+				respondError(w, http.StatusBadRequest, "invalid effort_sprints")
+				return
+			}
+			if err := s.store.UpdateOpportunityEffort(ctx, oppID, body.EffortSprints); err != nil {
+				respondError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			updated, _ := s.store.GetOpportunityByID(ctx, oppID)
+			respondJSON(w, http.StatusOK, updated)
 			return
 		}
 

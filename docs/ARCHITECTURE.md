@@ -18,22 +18,32 @@ The engine is built as a single Go binary with an embedded React 19 web applicat
 4. **HDBSCAN Clustering Engine (`internal/cluster/hdbscan.go`)**
    Groups dense feedback vectors by density:
    - Computes pairwise Euclidean distance matrices.
-   - Calculates core distances for min points $k = 2$.
+   - Calculates core distances for min points k.
    - Builds a Minimum Spanning Tree (MST) on mutual reachability graphs using Prim's algorithm.
    - Condenses clusters satisfying minimum cluster size thresholds.
-   - Labels outliers as noise ($label = -1$).
+   - Labels outliers as noise (label = -1).
+   - Supports dynamic macro, balanced, and micro granularity tuning via API and UI.
 
-5. **Mathematical Revenue Ranking Matrix (`internal/ranking`)**
-   Scores product themes using the Weighted Revenue Score (WRS), factoring in ARR, renewal proximity, and account churn risk.
+5. **Competitor Loss Attribution Engine (`internal/cluster/extractor.go`, `internal/ranking/calculator.go`)**
+   Scans incoming transcripts and tickets for competitor mentions (such as Okta, Auth0, Azure AD, Splunk, Datadog, Snowflake, and BigQuery). Calculates Lost Pipeline ARR by summing the contract value of accounts threatening churn or evaluating third-party replacements.
 
-6. **Autonomous PRD Synthesizer (`internal/prd`)**
-   Generates comprehensive Product Requirements Documents with executive summaries, customer evidence citations, user stories, and Gherkin acceptance criteria (`Feature`, `Scenario`, `Given`, `When`, `Then`).
+6. **Mathematical Revenue Ranking & ROI Index (`internal/ranking`)**
+   Scores product themes using the Weighted Revenue Score (WRS), factoring in ARR, renewal proximity, and account churn risk. Computes ROI Index ($ARR per sprint) based on engineering effort allocations.
 
-7. **Closed-Loop Communications (`internal/closedloop`)**
-   Drafts personalized customer emails quoting original feedback when an opportunity transitions to "SHIPPED".
+7. **Autonomous PRD Synthesizer (`internal/prd`)**
+   Generates comprehensive Product Requirements Documents with executive summaries, customer evidence citations, user stories, and Gherkin acceptance criteria (Feature, Scenario, Given, When, Then).
 
-8. **Embedded Product Studio (`web/`)**
-   A React 19 single-page application served directly from the Go binary via `embed.FS`.
+8. **Bidirectional Work Tracking Exporters (`internal/prd/github_exporter.go`, `internal/prd/jira_exporter.go`)**
+   Exports PRDs directly to structured GitHub Issue payloads (with acceptance checklists and labels) and Jira Epic payloads (with background narrative and functional scope).
+
+9. **Interactive Ingestion Sandbox (`internal/api/server.go`, `web/src/pages/SandboxPage.tsx`)**
+   Allows operators to test raw customer quotes against the live NLP pipeline, inspecting CRM domain attribution, competitor detection, subword vectorization, and instant cosine similarity matching against existing clusters.
+
+10. **Closed-Loop Communications (`internal/closedloop`)**
+    Drafts personalized customer emails quoting original feedback when an opportunity transitions to "SHIPPED".
+
+11. **Embedded Product Studio (`web/`)**
+    A React 19 single-page application served directly from the Go binary via `embed.FS`.
 
 ## 2. Ingestion to PRD Data Flow
 
@@ -59,12 +69,12 @@ The engine is built as a single Go binary with an embedded React 19 web applicat
                              |
                              v
 +-----------------------------------------------------------+
-| Revenue Scoring: Sum ARR and compute Weighted WRS         |
+| Revenue Scoring & ROI: Sum ARR, Lost Pipeline ARR, WRS    |
 +-----------------------------------------------------------+
                              |
                              v
 +-----------------------------------------------------------+
-| PRD Synthesizer: Generate Markdown and Notion block JSON  |
+| PRD Synthesizer: Generate Markdown, Notion, GitHub, Jira  |
 +-----------------------------------------------------------+
                              |
                              v
@@ -77,7 +87,7 @@ The engine is built as a single Go binary with an embedded React 19 web applicat
 
 The SQLite store uses Write-Ahead Logging (WAL) mode for concurrency:
 - `accounts`: Customer names, domains, ARR in USD, plan tier, renewal date, and churn risk.
-- `feedback_items`: Raw text, extracted pain points, customer email, urgency score, and binary vector blob.
-- `opportunities`: Synthesized title, description, category, total ARR, WRS score, and generated PRD markdown.
+- `feedback_items`: Raw text, extracted pain points, customer email, urgency score, competitor mentions, and binary vector blob.
+- `opportunities`: Synthesized title, description, category, total ARR, lost pipeline ARR, effort sprints, ROI index, renewal alert flag, velocity growth, WRS score, and generated PRD markdown.
 - `feedback_opportunity_map`: Links individual feedback items to opportunities.
 - `closed_loop_notifications`: Generated customer update emails and dispatch status.

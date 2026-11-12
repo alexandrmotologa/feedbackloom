@@ -1,4 +1,4 @@
-# `feedbackloom` — Architecture & Engineering Master Plan
+# `feedbackloom`: Architecture & Engineering Master Plan
 > **Autonomous Customer Voice & ARR-Weighted Feature Request Synthesizer**  
 > *Target: AI Product Engineering, Product Ops Automation, Revenue-Weighted Roadmaps & Automated PRD Synthesis*
 
@@ -15,7 +15,7 @@ Modern SaaS product management teams are overwhelmed by thousands of fragmented 
 
 Current approaches to feedback analysis fail because of two fatal flaws:
 1. **The "Loudest Voice / Frequency" Bias**: Standard tools (word clouds, keyword counting) measure volume rather than business value. A minor bug reported by 50 free-tier users looks 10x more important than an enterprise blocking issue demanded by 2 Fortune 500 accounts representing \$300,000 in ARR.
-2. **The PRD Drafting Bottleneck**: Even when a critical product gap is identified, Product Managers spend 15–20 hours writing a comprehensive Product Requirements Document (PRD), detailing user stories, edge cases, and customer evidence quotes.
+2. **The PRD Drafting Bottleneck**: Even when a critical product gap is identified, Product Managers spend 15 to 20 hours writing a comprehensive Product Requirements Document (PRD), detailing user stories, edge cases, and customer evidence quotes.
 
 ### 1.2 The `feedbackloom` Solution
 `feedbackloom` is an autonomous, self-hosted Go and React 19 engine that turns noisy customer signals into **revenue-weighted product specifications**:

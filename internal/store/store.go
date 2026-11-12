@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -153,8 +154,8 @@ func (s *Store) ListAccounts(ctx context.Context) ([]models.Account, error) {
 // InsertFeedbackItem persists a new feedback item.
 func (s *Store) InsertFeedbackItem(ctx context.Context, item *models.FeedbackItem) error {
 	query := `
-		INSERT INTO feedback_items (id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, embedding, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO feedback_items (id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, competitor_mentions, embedding, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			account_id = excluded.account_id,
 			customer_name = excluded.customer_name,
@@ -162,6 +163,7 @@ func (s *Store) InsertFeedbackItem(ctx context.Context, item *models.FeedbackIte
 			extracted_outcome = excluded.extracted_outcome,
 			sentiment_score = excluded.sentiment_score,
 			urgency_score = excluded.urgency_score,
+			competitor_mentions = excluded.competitor_mentions,
 			embedding = excluded.embedding;
 	`
 	now := time.Now().UTC()
@@ -179,6 +181,8 @@ func (s *Store) InsertFeedbackItem(ctx context.Context, item *models.FeedbackIte
 		accountIDVal = item.AccountID
 	}
 
+	compJSON, _ := json.Marshal(item.CompetitorMentions)
+
 	_, err := s.db.ExecContext(ctx, query,
 		item.ID,
 		item.Source,
@@ -190,6 +194,7 @@ func (s *Store) InsertFeedbackItem(ctx context.Context, item *models.FeedbackIte
 		item.ExtractedOutcome,
 		item.SentimentScore,
 		item.UrgencyScore,
+		string(compJSON),
 		embBytes,
 		item.CreatedAt.Format(time.RFC3339),
 	)
@@ -201,18 +206,15 @@ func (s *Store) InsertFeedbackItem(ctx context.Context, item *models.FeedbackIte
 
 // GetFeedbackItemByID fetches a single feedback entry.
 func (s *Store) GetFeedbackItemByID(ctx context.Context, id string) (*models.FeedbackItem, error) {
-	query := `SELECT id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, embedding, created_at FROM feedback_items WHERE id = ?`
+	query := `SELECT id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, competitor_mentions, embedding, created_at FROM feedback_items WHERE id = ?`
 	row := s.db.QueryRowContext(ctx, query, id)
 
 	var item models.FeedbackItem
-	var accountID sql.NullString
-	var custName sql.NullString
-	var painPoint sql.NullString
-	var outcome sql.NullString
+	var accountID, custName, painPoint, outcome, compStr sql.NullString
 	var embBytes []byte
 	var createdStr string
 
-	err := row.Scan(&item.ID, &item.Source, &accountID, &item.CustomerEmail, &custName, &item.RawText, &painPoint, &outcome, &item.SentimentScore, &item.UrgencyScore, &embBytes, &createdStr)
+	err := row.Scan(&item.ID, &item.Source, &accountID, &item.CustomerEmail, &custName, &item.RawText, &painPoint, &outcome, &item.SentimentScore, &item.UrgencyScore, &compStr, &embBytes, &createdStr)
 	if err != nil {
 		return nil, err
 	}
@@ -229,6 +231,9 @@ func (s *Store) GetFeedbackItemByID(ctx context.Context, id string) (*models.Fee
 	if outcome.Valid {
 		item.ExtractedOutcome = outcome.String
 	}
+	if compStr.Valid && compStr.String != "" {
+		_ = json.Unmarshal([]byte(compStr.String), &item.CompetitorMentions)
+	}
 	if len(embBytes) > 0 {
 		item.Embedding = DecodeFloat32Slice(embBytes)
 	}
@@ -243,7 +248,7 @@ func (s *Store) ListFeedbackItems(ctx context.Context, limit, offset int) ([]mod
 		limit = 100
 	}
 	query := `
-		SELECT id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, embedding, created_at
+		SELECT id, source, account_id, customer_email, customer_name, raw_text, extracted_pain_point, extracted_outcome, sentiment_score, urgency_score, competitor_mentions, embedding, created_at
 		FROM feedback_items
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
@@ -257,11 +262,11 @@ func (s *Store) ListFeedbackItems(ctx context.Context, limit, offset int) ([]mod
 	var result []models.FeedbackItem
 	for rows.Next() {
 		var item models.FeedbackItem
-		var accountID, custName, painPoint, outcome sql.NullString
+		var accountID, custName, painPoint, outcome, compStr sql.NullString
 		var embBytes []byte
 		var createdStr string
 
-		if err := rows.Scan(&item.ID, &item.Source, &accountID, &item.CustomerEmail, &custName, &item.RawText, &painPoint, &outcome, &item.SentimentScore, &item.UrgencyScore, &embBytes, &createdStr); err != nil {
+		if err := rows.Scan(&item.ID, &item.Source, &accountID, &item.CustomerEmail, &custName, &item.RawText, &painPoint, &outcome, &item.SentimentScore, &item.UrgencyScore, &compStr, &embBytes, &createdStr); err != nil {
 			return nil, err
 		}
 		if accountID.Valid {
@@ -275,6 +280,9 @@ func (s *Store) ListFeedbackItems(ctx context.Context, limit, offset int) ([]mod
 		}
 		if outcome.Valid {
 			item.ExtractedOutcome = outcome.String
+		}
+		if compStr.Valid && compStr.String != "" {
+			_ = json.Unmarshal([]byte(compStr.String), &item.CompetitorMentions)
 		}
 		if len(embBytes) > 0 {
 			item.Embedding = DecodeFloat32Slice(embBytes)
@@ -291,9 +299,10 @@ func (s *Store) ListAllFeedbackItems(ctx context.Context) ([]models.FeedbackItem
 }
 
 // UpdateFeedbackExtraction updates NLP extraction fields.
-func (s *Store) UpdateFeedbackExtraction(ctx context.Context, id string, painPoint, outcome string, sentiment, urgency float64) error {
-	query := `UPDATE feedback_items SET extracted_pain_point = ?, extracted_outcome = ?, sentiment_score = ?, urgency_score = ? WHERE id = ?`
-	_, err := s.db.ExecContext(ctx, query, painPoint, outcome, sentiment, urgency, id)
+func (s *Store) UpdateFeedbackExtraction(ctx context.Context, id string, painPoint, outcome string, sentiment, urgency float64, competitors []string) error {
+	compJSON, _ := json.Marshal(competitors)
+	query := `UPDATE feedback_items SET extracted_pain_point = ?, extracted_outcome = ?, sentiment_score = ?, urgency_score = ?, competitor_mentions = ? WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, painPoint, outcome, sentiment, urgency, string(compJSON), id)
 	return err
 }
 
@@ -314,8 +323,8 @@ func (s *Store) UpdateFeedbackAccount(ctx context.Context, feedbackID, accountID
 // UpsertOpportunity creates or updates a product opportunity.
 func (s *Store) UpsertOpportunity(ctx context.Context, opp *models.Opportunity) error {
 	query := `
-		INSERT INTO opportunities (id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO opportunities (id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, competitor_mentions, lost_pipeline_arr, effort_sprints, roi_index, urgent_renewal_alert, velocity_growth_pct, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			title = excluded.title,
 			description = excluded.description,
@@ -325,6 +334,12 @@ func (s *Store) UpsertOpportunity(ctx context.Context, opp *models.Opportunity) 
 			account_count = excluded.account_count,
 			feedback_count = excluded.feedback_count,
 			status = excluded.status,
+			competitor_mentions = excluded.competitor_mentions,
+			lost_pipeline_arr = excluded.lost_pipeline_arr,
+			effort_sprints = excluded.effort_sprints,
+			roi_index = excluded.roi_index,
+			urgent_renewal_alert = excluded.urgent_renewal_alert,
+			velocity_growth_pct = excluded.velocity_growth_pct,
 			generated_prd_markdown = excluded.generated_prd_markdown,
 			generated_prd_notion_json = excluded.generated_prd_notion_json,
 			shipped_at = excluded.shipped_at,
@@ -341,6 +356,19 @@ func (s *Store) UpsertOpportunity(ctx context.Context, opp *models.Opportunity) 
 		shippedStr = opp.ShippedAt.Format(time.RFC3339)
 	}
 
+	compJSON, _ := json.Marshal(opp.CompetitorMentions)
+	urgentVal := 0
+	if opp.UrgentRenewalAlert {
+		urgentVal = 1
+	}
+
+	if opp.EffortSprints <= 0 {
+		opp.EffortSprints = 2
+	}
+	if opp.ROIIndex <= 0 {
+		opp.ROIIndex = opp.TotalARRUSD / float64(opp.EffortSprints)
+	}
+
 	_, err := s.db.ExecContext(ctx, query,
 		opp.ID,
 		opp.Title,
@@ -351,6 +379,12 @@ func (s *Store) UpsertOpportunity(ctx context.Context, opp *models.Opportunity) 
 		opp.AccountCount,
 		opp.FeedbackCount,
 		opp.Status,
+		string(compJSON),
+		opp.LostPipelineARR,
+		opp.EffortSprints,
+		opp.ROIIndex,
+		urgentVal,
+		opp.VelocityGrowthPct,
 		opp.GeneratedPRDMarkdown,
 		opp.GeneratedPRDNotionJSON,
 		shippedStr,
@@ -362,18 +396,28 @@ func (s *Store) UpsertOpportunity(ctx context.Context, opp *models.Opportunity) 
 
 // GetOpportunityByID fetches an opportunity by ID.
 func (s *Store) GetOpportunityByID(ctx context.Context, id string) (*models.Opportunity, error) {
-	query := `SELECT id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at FROM opportunities WHERE id = ?`
+	query := `SELECT id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, competitor_mentions, lost_pipeline_arr, effort_sprints, roi_index, urgent_renewal_alert, velocity_growth_pct, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at FROM opportunities WHERE id = ?`
 	row := s.db.QueryRowContext(ctx, query, id)
 
 	var opp models.Opportunity
-	var prdMD, prdNotion, shippedStr sql.NullString
+	var prdMD, prdNotion, shippedStr, compStr sql.NullString
+	var urgentVal int
 	var createdStr, updatedStr string
 
-	err := row.Scan(&opp.ID, &opp.Title, &opp.Description, &opp.Category, &opp.TotalARRUSD, &opp.WeightedScore, &opp.AccountCount, &opp.FeedbackCount, &opp.Status, &prdMD, &prdNotion, &shippedStr, &createdStr, &updatedStr)
+	err := row.Scan(
+		&opp.ID, &opp.Title, &opp.Description, &opp.Category, &opp.TotalARRUSD, &opp.WeightedScore,
+		&opp.AccountCount, &opp.FeedbackCount, &opp.Status, &compStr, &opp.LostPipelineARR,
+		&opp.EffortSprints, &opp.ROIIndex, &urgentVal, &opp.VelocityGrowthPct,
+		&prdMD, &prdNotion, &shippedStr, &createdStr, &updatedStr,
+	)
 	if err != nil {
 		return nil, err
 	}
 
+	opp.UrgentRenewalAlert = (urgentVal == 1)
+	if compStr.Valid && compStr.String != "" {
+		_ = json.Unmarshal([]byte(compStr.String), &opp.CompetitorMentions)
+	}
 	if prdMD.Valid {
 		opp.GeneratedPRDMarkdown = prdMD.String
 	}
@@ -393,7 +437,7 @@ func (s *Store) GetOpportunityByID(ctx context.Context, id string) (*models.Oppo
 // ListOpportunities returns all opportunities ordered by Weighted Revenue Score (WRS) descending.
 func (s *Store) ListOpportunities(ctx context.Context) ([]models.Opportunity, error) {
 	query := `
-		SELECT id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at
+		SELECT id, title, description, category, total_arr_usd, weighted_score, account_count, feedback_count, status, competitor_mentions, lost_pipeline_arr, effort_sprints, roi_index, urgent_renewal_alert, velocity_growth_pct, generated_prd_markdown, generated_prd_notion_json, shipped_at, created_at, updated_at
 		FROM opportunities
 		ORDER BY weighted_score DESC, total_arr_usd DESC
 	`
@@ -406,11 +450,22 @@ func (s *Store) ListOpportunities(ctx context.Context) ([]models.Opportunity, er
 	var result []models.Opportunity
 	for rows.Next() {
 		var opp models.Opportunity
-		var prdMD, prdNotion, shippedStr sql.NullString
+		var prdMD, prdNotion, shippedStr, compStr sql.NullString
+		var urgentVal int
 		var createdStr, updatedStr string
 
-		if err := rows.Scan(&opp.ID, &opp.Title, &opp.Description, &opp.Category, &opp.TotalARRUSD, &opp.WeightedScore, &opp.AccountCount, &opp.FeedbackCount, &opp.Status, &prdMD, &prdNotion, &shippedStr, &createdStr, &updatedStr); err != nil {
+		if err := rows.Scan(
+			&opp.ID, &opp.Title, &opp.Description, &opp.Category, &opp.TotalARRUSD, &opp.WeightedScore,
+			&opp.AccountCount, &opp.FeedbackCount, &opp.Status, &compStr, &opp.LostPipelineARR,
+			&opp.EffortSprints, &opp.ROIIndex, &urgentVal, &opp.VelocityGrowthPct,
+			&prdMD, &prdNotion, &shippedStr, &createdStr, &updatedStr,
+		); err != nil {
 			return nil, err
+		}
+
+		opp.UrgentRenewalAlert = (urgentVal == 1)
+		if compStr.Valid && compStr.String != "" {
+			_ = json.Unmarshal([]byte(compStr.String), &opp.CompetitorMentions)
 		}
 		if prdMD.Valid {
 			opp.GeneratedPRDMarkdown = prdMD.String
@@ -427,6 +482,22 @@ func (s *Store) ListOpportunities(ctx context.Context) ([]models.Opportunity, er
 		result = append(result, opp)
 	}
 	return result, rows.Err()
+}
+
+// UpdateOpportunityEffort updates the estimated engineering sprints and recalculates ROI index.
+func (s *Store) UpdateOpportunityEffort(ctx context.Context, id string, sprints int) error {
+	if sprints <= 0 {
+		sprints = 1
+	}
+	query := `
+		UPDATE opportunities
+		SET effort_sprints = ?,
+		    roi_index = total_arr_usd / ?,
+		    updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`
+	_, err := s.db.ExecContext(ctx, query, sprints, sprints, id)
+	return err
 }
 
 // DeleteOpportunity removes an opportunity and its feedback links.
@@ -486,7 +557,7 @@ func (s *Store) ListEnrichedFeedbackForOpportunity(ctx context.Context, opportun
 	query := `
 		SELECT 
 			f.id, f.source, f.account_id, f.customer_email, f.customer_name, f.raw_text,
-			f.extracted_pain_point, f.extracted_outcome, f.sentiment_score, f.urgency_score, f.created_at,
+			f.extracted_pain_point, f.extracted_outcome, f.sentiment_score, f.urgency_score, f.competitor_mentions, f.embedding, f.created_at,
 			COALESCE(a.name, ''), COALESCE(a.domain, ''), COALESCE(a.arr_usd, 0.0),
 			COALESCE(a.plan_tier, 'STARTER'), COALESCE(a.renewal_date, ''), COALESCE(a.churn_risk_score, 0.2)
 		FROM feedback_opportunity_map m
@@ -504,12 +575,14 @@ func (s *Store) ListEnrichedFeedbackForOpportunity(ctx context.Context, opportun
 	var result []models.EnrichedFeedbackItem
 	for rows.Next() {
 		var item models.EnrichedFeedbackItem
-		var custName, painPoint, outcome sql.NullString
+		var custName, painPoint, outcome, compStr sql.NullString
+		var embBytes []byte
 		var createdStr, renewalStr string
 
 		err := rows.Scan(
 			&item.ID, &item.Source, &item.AccountID, &item.CustomerEmail, &custName, &item.RawText,
-			&item.ExtractedPainPoint, &item.ExtractedOutcome, &item.SentimentScore, &item.UrgencyScore, &createdStr,
+			&item.ExtractedPainPoint, &item.ExtractedOutcome, &item.SentimentScore, &item.UrgencyScore,
+			&compStr, &embBytes, &createdStr,
 			&item.AccountName, &item.AccountDomain, &item.AccountARRUSD,
 			&item.PlanTier, &renewalStr, &item.ChurnRiskScore,
 		)
@@ -525,6 +598,12 @@ func (s *Store) ListEnrichedFeedbackForOpportunity(ctx context.Context, opportun
 		}
 		if outcome.Valid {
 			item.ExtractedOutcome = outcome.String
+		}
+		if compStr.Valid && compStr.String != "" {
+			_ = json.Unmarshal([]byte(compStr.String), &item.CompetitorMentions)
+		}
+		if len(embBytes) > 0 {
+			item.Embedding = DecodeFloat32Slice(embBytes)
 		}
 		item.CreatedAt, _ = time.Parse(time.RFC3339, createdStr)
 		item.RenewalDate = renewalStr
@@ -622,7 +701,7 @@ func (s *Store) UpdateNotificationStatus(ctx context.Context, id string, status 
 	return err
 }
 
-// GetDashboardStats aggregates top-level portfolio revenue and feedback metrics.
+// GetDashboardStats aggregates top-level portfolio revenue, competitor loss, and feedback metrics.
 func (s *Store) GetDashboardStats(ctx context.Context) (map[string]interface{}, error) {
 	stats := make(map[string]interface{})
 
@@ -644,12 +723,14 @@ func (s *Store) GetDashboardStats(ctx context.Context) (map[string]interface{}, 
 
 	var totalOpportunities int
 	var demandedARR float64
-	err = s.db.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(total_arr_usd), 0.0) FROM opportunities`).Scan(&totalOpportunities, &demandedARR)
+	var lostPipelineARR float64
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(total_arr_usd), 0.0), COALESCE(SUM(lost_pipeline_arr), 0.0) FROM opportunities`).Scan(&totalOpportunities, &demandedARR, &lostPipelineARR)
 	if err != nil {
 		return nil, err
 	}
 	stats["total_opportunities"] = totalOpportunities
 	stats["total_demanded_arr_usd"] = demandedARR
+	stats["total_lost_pipeline_arr_usd"] = lostPipelineARR
 
 	return stats, nil
 }

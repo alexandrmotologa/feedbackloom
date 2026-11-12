@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Opportunity, DashboardStats } from './types'
-import { fetchStats, fetchOpportunities, updateOpportunityStatus, runClustering } from './api'
+import {
+  fetchStats,
+  fetchOpportunities,
+  updateOpportunityStatus,
+  updateOpportunityEffort,
+  runClustering,
+} from './api'
 import { Header } from './components/Header'
 import { ClosedLoopModal } from './components/ClosedLoopModal'
 import { OpportunitiesPage } from './pages/OpportunitiesPage'
@@ -8,6 +14,7 @@ import { PRDStudioPage } from './pages/PRDStudioPage'
 import { EvidenceStreamPage } from './pages/EvidenceStreamPage'
 import { ConnectorsPage } from './pages/ConnectorsPage'
 import { ClosedLoopPage } from './pages/ClosedLoopPage'
+import { SandboxPage } from './pages/SandboxPage'
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('opportunities')
@@ -52,9 +59,28 @@ export const App: React.FC = () => {
     }
   }
 
-  const handleRunClustering = async () => {
+  const handleEffortChange = async (id: string, sprints: number) => {
     try {
-      await runClustering()
+      await updateOpportunityEffort(id, sprints)
+      setOpportunities((prev) =>
+        prev.map((o) =>
+          o.id === id
+            ? {
+                ...o,
+                effort_sprints: sprints,
+                roi_index: sprints > 0 ? o.total_arr_usd / sprints : o.total_arr_usd,
+              }
+            : o
+        )
+      )
+    } catch (err: any) {
+      alert(`Failed to update effort estimate: ${err.message}`)
+    }
+  }
+
+  const handleRunClustering = async (minClusterSize?: number, minPoints?: number) => {
+    try {
+      await runClustering(minClusterSize, minPoints)
       await loadAll()
     } catch (err: any) {
       alert(`Clustering failed: ${err.message}`)
@@ -86,6 +112,7 @@ export const App: React.FC = () => {
                 onStatusChange={handleStatusChange}
                 onOpenClosedLoop={(opp) => setClosedLoopModalOpp(opp)}
                 onRunClustering={handleRunClustering}
+                onEffortChange={handleEffortChange}
               />
             )}
 
@@ -95,6 +122,10 @@ export const App: React.FC = () => {
                 selectedOpportunityId={selectedOpportunityId}
                 onSelectOpportunity={setSelectedOpportunityId}
               />
+            )}
+
+            {activeTab === 'sandbox' && (
+              <SandboxPage onSelectPRD={handleSelectPRD} />
             )}
 
             {activeTab === 'evidence' && <EvidenceStreamPage />}

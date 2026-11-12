@@ -9,11 +9,12 @@ import (
 
 // ExtractionResult holds NLP extraction details from raw feedback text.
 type ExtractionResult struct {
-	PainPoint      string
-	DesiredOutcome string
-	Category       string
-	SentimentScore float64 // -1.0 to 1.0
-	UrgencyScore   float64 // 0.0 to 1.0
+	PainPoint          string
+	DesiredOutcome     string
+	Category           string
+	SentimentScore     float64 // -1.0 to 1.0
+	UrgencyScore       float64 // 0.0 to 1.0
+	CompetitorMentions []string
 }
 
 // FeedbackExtractor extracts actionable insights from customer quotes.
@@ -24,14 +25,15 @@ func NewFeedbackExtractor() *FeedbackExtractor {
 	return &FeedbackExtractor{}
 }
 
-// Extract processes a raw text quote and extracts structured pain points and urgency.
+// Extract processes a raw text quote and extracts structured pain points, urgency, and competitor mentions.
 func (e *FeedbackExtractor) Extract(ctx context.Context, rawText string) ExtractionResult {
 	lower := strings.ToLower(rawText)
 
 	res := ExtractionResult{
-		SentimentScore: -0.2, // Default neutral-frustrated
-		UrgencyScore:   0.3,  // Baseline urgency
-		Category:       models.CategoryUsability,
+		SentimentScore:     -0.2, // Default neutral-frustrated
+		UrgencyScore:       0.3,  // Baseline urgency
+		Category:           models.CategoryUsability,
+		CompetitorMentions: make([]string, 0),
 	}
 
 	// 1. Urgency calculation
@@ -49,7 +51,31 @@ func (e *FeedbackExtractor) Extract(ctx context.Context, rawText string) Extract
 		res.SentimentScore = 0.3
 	}
 
-	// 2. Category & Pain Point detection
+	// 2. Competitor detection
+	knownCompetitors := map[string]string{
+		"okta":          "Okta",
+		"auth0":         "Auth0",
+		"azure ad":      "Azure AD",
+		"ping identity": "Ping Identity",
+		"splunk":        "Splunk",
+		"datadog":       "Datadog",
+		"sumo logic":    "Sumo Logic",
+		"new relic":     "New Relic",
+		"snowflake":     "Snowflake",
+		"jira":          "Jira",
+		"linear":        "Linear",
+		"slack":         "Slack",
+	}
+
+	seenCompetitors := make(map[string]bool)
+	for key, displayName := range knownCompetitors {
+		if strings.Contains(lower, key) && !seenCompetitors[displayName] {
+			res.CompetitorMentions = append(res.CompetitorMentions, displayName)
+			seenCompetitors[displayName] = true
+		}
+	}
+
+	// 3. Category & Pain Point detection
 	switch {
 	case strings.Contains(lower, "sso") || strings.Contains(lower, "saml") || strings.Contains(lower, "okta") || strings.Contains(lower, "azure ad") || strings.Contains(lower, "login"):
 		res.Category = models.CategorySecurity
