@@ -88,7 +88,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0d14] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       <Header
         stats={stats}
         activeTab={activeTab}
@@ -96,11 +96,12 @@ export const App: React.FC = () => {
         onRefresh={loadAll}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-[1520px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="py-24 text-center text-slate-500 text-sm">
-            <div className="inline-block w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-3" />
-            <div>Initializing feedbackloom Product Studio...</div>
+          <div className="py-32 text-center text-slate-400 text-sm space-y-3">
+            <div className="inline-block w-9 h-9 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="font-semibold text-white">Initializing feedbackloom Product Studio...</div>
+            <p className="text-xs text-slate-500">Connecting to SQLite WAL database and loading portfolio metrics.</p>
           </div>
         ) : (
           <>
@@ -152,8 +153,19 @@ export const App: React.FC = () => {
       )}
 
       {/* Persistent Footer */}
-      <footer className="border-t border-[#1e293b]/70 py-4 px-6 text-center text-[11px] text-[#64748b]">
-        feedbackloom &bull; Autonomous Customer Voice &amp; ARR-Weighted PRD Synthesizer &bull; Pure Go + React 19 &bull; SQLite WAL
+      <footer className="border-t border-slate-800/60 bg-[#090c14] py-5 px-6 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between max-w-[1520px] mx-auto w-full gap-2">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-400">feedbackloom</span>
+          <span>&bull;</span>
+          <span>Autonomous Customer Voice &amp; ARR-Weighted PRD Synthesizer</span>
+        </div>
+        <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500">
+          <span>Pure Go 1.24</span>
+          <span>&bull;</span>
+          <span>React 19 + Tailwind CSS</span>
+          <span>&bull;</span>
+          <span>SQLite WAL</span>
+        </div>
       </footer>
     </div>
   )

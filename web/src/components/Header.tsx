@@ -27,85 +27,82 @@ export const Header: React.FC<HeaderProps> = ({ stats, activeTab, setActiveTab, 
   }
 
   return (
-    <header className="border-b border-[#1e293b] bg-[#0c101a] sticky top-0 z-30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo and System Status */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-              FL
+    <header className="border-b border-slate-800/80 bg-[#0a0e17]/90 backdrop-blur-md sticky top-0 z-40 transition-all">
+      <div className="max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between py-3.5 border-b border-slate-800/50 gap-4">
+          {/* Logo & Product Tagline */}
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
+              <span className="font-mono text-sm tracking-tighter">FL</span>
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-tight text-white">feedbackloom</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <div className="flex items-center gap-2.5">
+                <span className="font-bold text-lg tracking-tight text-white font-sans">feedbackloom</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   DAEMON ONLINE
                 </span>
               </div>
-              <p className="text-[11px] text-[#64748b]">Revenue-Driven Product Architect Engine</p>
+              <p className="text-xs text-slate-400 font-medium">Revenue-Driven Product Architect &amp; Autonomous PRD Synthesizer</p>
             </div>
           </div>
 
-          {/* Real-time KPI Ribbon */}
+          {/* Quick Metrics Bar in Header */}
           {stats && (
-            <div className="hidden lg:flex items-center gap-5 text-xs bg-[#121826] px-4 py-1.5 rounded-lg border border-[#1e293b]">
-              <div>
-                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Demanded ARR</span>
-                <span className="font-bold text-emerald-400 font-mono">{formatCurrency(stats.total_demanded_arr_usd)}</span>
-              </div>
-              {stats.total_lost_pipeline_arr_usd ? (
-                <>
-                  <div className="h-6 w-px bg-[#1e293b]" />
-                  <div>
-                    <span className="text-rose-400/80 block text-[10px] uppercase font-semibold">Pipeline at Risk</span>
-                    <span className="font-bold text-rose-400 font-mono">{formatCurrency(stats.total_lost_pipeline_arr_usd)}</span>
-                  </div>
-                </>
-              ) : null}
-              <div className="h-6 w-px bg-[#1e293b]" />
-              <div>
-                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Portfolio ARR</span>
-                <span className="font-semibold text-slate-300 font-mono">{formatCurrency(stats.portfolio_arr_usd)}</span>
-              </div>
-              <div className="h-6 w-px bg-[#1e293b]" />
-              <div>
-                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Opportunities</span>
-                <span className="font-semibold text-blue-400 font-mono">{stats.total_opportunities}</span>
-              </div>
-              <div className="h-6 w-px bg-[#1e293b]" />
-              <div>
-                <span className="text-[#64748b] block text-[10px] uppercase font-semibold">Feedback</span>
-                <span className="font-semibold text-purple-400 font-mono">{stats.total_feedback}</span>
+            <div className="hidden xl:flex items-center gap-3">
+              <div className="bg-[#111726]/80 px-4 py-2 rounded-xl border border-slate-800/80 flex items-center gap-3 shadow-inner">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Demanded ARR</span>
+                  <span className="text-sm font-bold font-mono text-emerald-400">{formatCurrency(stats.total_demanded_arr_usd)}</span>
+                </div>
+                <div className="h-6 w-px bg-slate-800" />
+                <div>
+                  <span className="text-[10px] text-rose-400/90 uppercase font-semibold tracking-wider block">Pipeline at Risk</span>
+                  <span className="text-sm font-bold font-mono text-rose-400">
+                    {formatCurrency(stats.total_lost_pipeline_arr_usd || 0)}
+                  </span>
+                </div>
+                <div className="h-6 w-px bg-slate-800" />
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Portfolio ARR</span>
+                  <span className="text-sm font-semibold font-mono text-slate-300">{formatCurrency(stats.portfolio_arr_usd)}</span>
+                </div>
+                <div className="h-6 w-px bg-slate-800" />
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Signals</span>
+                  <span className="text-sm font-semibold font-mono text-cyan-400">{stats.total_feedback} quotes</span>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Actions */}
+          {/* Header Action Button */}
           <div className="flex items-center gap-2">
             <button
               onClick={onRefresh}
-              className="text-xs bg-[#161f30] hover:bg-[#1e293b] text-slate-300 border border-[#1e293b] px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+              className="text-xs font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
-              <span>↻</span> Refresh
+              <span>↻</span> Refresh Pipeline
             </button>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav className="flex space-x-1 border-t border-[#1e293b]/50 pt-1 -mb-px overflow-x-auto">
+        {/* Navigation Tabs Bar */}
+        <nav className="flex space-x-1.5 py-2 -mb-px overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-medium border-b-2 whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
-                    ? 'border-blue-500 text-white bg-blue-500/10'
-                    : 'border-transparent text-[#94a3b8] hover:text-white hover:bg-slate-800/40'
+                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
                 }`}
               >
-                <span>{tab.icon}</span>
+                <span className="text-sm">{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             )

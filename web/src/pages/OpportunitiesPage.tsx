@@ -52,7 +52,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Waterfall Visualizer */}
       <ARRWaterfall opportunities={opportunities} totalPortfolioARR={totalPortfolioARR} />
 
@@ -60,17 +60,17 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       <CompetitorMatrix opportunities={opportunities} />
 
       {/* Filter and Actions Bar */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-[#121826] p-4 rounded-xl border border-[#1e293b]">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-[#0f1422]/90 p-4 sm:p-5 rounded-2xl border border-slate-800/80 shadow-md backdrop-blur-md">
         {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 filterCategory === cat
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-[#182136] text-slate-400 hover:text-white hover:bg-[#202c47]'
+                  ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400/40'
+                  : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800/80'
               }`}
             >
               {cat}
@@ -79,32 +79,32 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         </div>
 
         {/* Search, Granularity Slider & Cluster Trigger */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           <input
             type="text"
             placeholder="Search opportunities..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-[#0c101a] border border-[#1e293b] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 w-full sm:w-48 outline-none transition-colors"
+            className="bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 w-full sm:w-52 outline-none transition-colors"
           />
 
           {/* Granularity Selector */}
-          <div className="flex items-center gap-1.5 bg-[#0c101a] border border-[#1e293b] rounded-lg px-2.5 py-1">
-            <span className="text-[10px] uppercase font-semibold text-[#64748b]">Granularity:</span>
+          <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5">
+            <span className="text-[10px] uppercase font-bold text-slate-400">Granularity:</span>
             <select
               value={granularity}
               onChange={(e) => setGranularity(e.target.value as any)}
               className="bg-transparent text-xs text-slate-200 outline-none cursor-pointer font-medium"
             >
-              <option value="macro" className="bg-[#0c101a] text-white">Macro (3+ items)</option>
-              <option value="balanced" className="bg-[#0c101a] text-white">Balanced (2+ items)</option>
-              <option value="micro" className="bg-[#0c101a] text-white">Micro (Fine-grain)</option>
+              <option value="macro" className="bg-slate-950 text-white">Macro (Broad)</option>
+              <option value="balanced" className="bg-slate-950 text-white">Balanced (Default)</option>
+              <option value="micro" className="bg-slate-950 text-white">Micro (Granular)</option>
             </select>
           </div>
 
           <button
             onClick={handleClusterWithGranularity}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white whitespace-nowrap shadow-sm flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white whitespace-nowrap shadow-sm flex items-center gap-2 transition-all"
           >
             <span>⚡</span>
             <span>Re-Cluster HDBSCAN</span>
@@ -113,7 +113,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       </div>
 
       {/* Opportunity List */}
-      <div className="space-y-3.5">
+      <div className="space-y-4">
         {filtered.map((opp, idx) => (
           <OpportunityCard
             key={opp.id}
@@ -127,11 +127,11 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         ))}
 
         {filtered.length === 0 && (
-          <div className="bg-[#121826] border border-[#1e293b] rounded-xl p-12 text-center text-slate-400 space-y-3">
-            <div className="text-3xl">🔍</div>
-            <div className="text-sm font-semibold text-white">No opportunities match the criteria</div>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Try adjusting your category filter, or run HDBSCAN clustering from the Data Connectors tab.
+          <div className="bg-[#0f1422]/90 border border-slate-800/80 rounded-2xl p-14 text-center text-slate-400 space-y-3">
+            <div className="text-4xl">🔍</div>
+            <div className="text-base font-semibold text-white">No opportunities match the criteria</div>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+              Try adjusting your category filter, or run HDBSCAN clustering from the Data Connectors tab to process unassigned customer quotes.
             </p>
           </div>
         )}

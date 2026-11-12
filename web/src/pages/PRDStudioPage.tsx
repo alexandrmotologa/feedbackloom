@@ -48,7 +48,7 @@ export const PRDStudioPage: React.FC<PRDStudioPageProps> = ({
 
   if (opportunities.length === 0) {
     return (
-      <div className="bg-[#121826] border border-[#1e293b] rounded-xl p-16 text-center text-slate-400 space-y-3">
+      <div className="bg-[#0f1422]/90 border border-slate-800/80 rounded-2xl p-16 text-center text-slate-400 space-y-3 shadow-lg">
         <div className="text-4xl">📄</div>
         <div className="text-base font-semibold text-white">No Opportunities Available</div>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
@@ -59,18 +59,18 @@ export const PRDStudioPage: React.FC<PRDStudioPageProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Selector Ribbon */}
-      <div className="bg-[#121826] border border-[#1e293b] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-[#0f1422]/90 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md backdrop-blur-md">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-xs uppercase font-bold text-[#64748b] whitespace-nowrap">Target Opportunity:</span>
+          <span className="text-xs uppercase font-bold text-slate-400 whitespace-nowrap">Target Opportunity:</span>
           <select
             value={activeID || ''}
             onChange={(e) => onSelectOpportunity(e.target.value)}
-            className="bg-[#0c101a] border border-[#1e293b] text-white text-xs rounded-lg px-3 py-2 outline-none w-full sm:w-96 font-medium"
+            className="bg-slate-950 border border-slate-800 text-white text-xs rounded-xl px-3.5 py-2.5 outline-none w-full sm:w-96 font-medium focus:border-blue-500"
           >
             {opportunities.map((opp) => (
-              <option key={opp.id} value={opp.id}>
+              <option key={opp.id} value={opp.id} className="bg-slate-950 text-white">
                 {opp.title} (${Math.round(opp.total_arr_usd / 1000)}k ARR - {opp.category})
               </option>
             ))}
@@ -78,15 +78,15 @@ export const PRDStudioPage: React.FC<PRDStudioPageProps> = ({
         </div>
 
         {currentOpp && (
-          <div className="flex items-center gap-4 text-xs font-mono text-slate-300">
+          <div className="flex items-center gap-5 text-xs font-mono text-slate-300 bg-slate-950/60 px-4 py-2 rounded-xl border border-slate-800/60">
             <div>
-              <span className="text-[#64748b] mr-1">ARR at Stake:</span>
+              <span className="text-slate-400 mr-1.5">ARR at Stake:</span>
               <span className="text-emerald-400 font-bold">${currentOpp.total_arr_usd.toLocaleString()}</span>
             </div>
-            <div className="h-4 w-px bg-[#1e293b]" />
+            <div className="h-4 w-px bg-slate-800" />
             <div>
-              <span className="text-[#64748b] mr-1">Quotes:</span>
-              <span className="text-blue-400 font-bold">{quotes.length}</span>
+              <span className="text-slate-400 mr-1.5">Customer Quotes:</span>
+              <span className="text-blue-400 font-bold">{quotes.length} accounts</span>
             </div>
           </div>
         )}

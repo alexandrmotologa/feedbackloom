@@ -45,48 +45,51 @@ export const CompetitorMatrix: React.FC<CompetitorMatrixProps> = ({ opportunitie
   }
 
   return (
-    <div className="bg-[#121826] border border-[#1e293b] rounded-xl p-5 mb-6 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#1e293b]">
+    <div className="bg-[#0f1422]/90 border border-slate-800/80 rounded-2xl p-6 sm:p-7 shadow-lg backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-800/60">
         <div>
-          <h2 className="text-sm font-semibold text-white tracking-wide uppercase flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            Competitor Loss Attribution & Churn Exposure
+          <h2 className="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+            Competitor Loss Attribution &amp; Churn Exposure
           </h2>
-          <p className="text-xs text-[#94a3b8] mt-0.5">
-            Customer contract value demanding capabilities where third-party competitors are actively cited as alternatives or churn threats.
+          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+            Customer contract value demanding capabilities where third-party alternatives are actively cited as churn threats.
           </p>
         </div>
+        <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 self-start sm:self-center">
+          HIGH RETENTION RISK
+        </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {competitorList.map((comp) => (
           <div
             key={comp.name}
-            className="bg-[#0e1320] border border-[#1e293b] hover:border-rose-900/40 rounded-xl p-3.5 space-y-2 transition-all"
+            className="bg-slate-950/60 border border-slate-800/80 hover:border-rose-800/50 rounded-xl p-4 space-y-3 transition-all shadow-sm hover:shadow-rose-950/20"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+              <span className="text-sm font-bold text-white flex items-center gap-2">
                 <span className="text-rose-400">⚔</span> {comp.name}
               </span>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
-                {comp.count} themes
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/10 text-rose-300 border border-rose-500/30">
+                {comp.count} {comp.count === 1 ? 'theme' : 'themes'}
               </span>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5 pt-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#64748b]">Demanded ARR:</span>
-                <span className="font-mono font-semibold text-emerald-400">{formatUSD(comp.totalARR)}</span>
+                <span className="text-slate-400">Demanded ARR:</span>
+                <span className="font-mono font-bold text-emerald-400">{formatUSD(comp.totalARR)}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#64748b]">Pipeline at Risk:</span>
-                <span className="font-mono font-semibold text-rose-400">{formatUSD(comp.lostPipelineARR)}</span>
+                <span className="text-slate-400">Pipeline at Risk:</span>
+                <span className="font-mono font-bold text-rose-400">{formatUSD(comp.lostPipelineARR)}</span>
               </div>
             </div>
 
-            <div className="pt-1.5 border-t border-[#1e293b]/60">
-              <span className="text-[10px] text-[#64748b] line-clamp-1">
-                Linked: {comp.opps.join(', ')}
+            <div className="pt-2 border-t border-slate-800/60">
+              <span className="text-[11px] text-slate-500 line-clamp-1">
+                Linked: <span className="text-slate-400">{comp.opps.join(', ')}</span>
               </span>
             </div>
           </div>

@@ -19,25 +19,28 @@ export const ARRWaterfall: React.FC<ARRWaterfallProps> = ({ opportunities, total
   const portfolioPct = totalPortfolioARR > 0 ? (totalDemanded / totalPortfolioARR) * 100 : 0
 
   return (
-    <div className="bg-[#121826] border border-[#1e293b] rounded-xl p-5 mb-6 shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-4 border-b border-[#1e293b]">
+    <div className="bg-[#0f1422]/90 border border-slate-800/80 rounded-2xl p-6 sm:p-7 shadow-lg backdrop-blur-md">
+      {/* Waterfall Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-800/60">
         <div>
-          <h2 className="text-sm font-semibold text-white tracking-wide uppercase flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <h2 className="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
             Revenue Opportunity Waterfall
           </h2>
-          <p className="text-xs text-[#94a3b8] mt-1">
-            Aggregated dollars demanding product capabilities across active customer contracts.
+          <p className="text-xs text-slate-400 mt-1 max-w-xl">
+            Aggregated dollars demanding product capabilities across active customer contracts, ranked by capital impact.
           </p>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="text-right">
-            <div className="text-xs text-[#64748b]">Total Demanded ARR</div>
-            <div className="text-xl font-bold font-mono text-emerald-400">{formatUSD(totalDemanded)}</div>
+
+        <div className="flex items-center gap-6 bg-slate-950/60 px-5 py-3 rounded-xl border border-slate-800/70">
+          <div>
+            <div className="text-[10px] uppercase font-semibold text-slate-400">Total Demanded ARR</div>
+            <div className="text-lg font-bold font-mono text-emerald-400 mt-0.5">{formatUSD(totalDemanded)}</div>
           </div>
-          <div className="text-right">
-            <div className="text-xs text-[#64748b]">Portfolio Coverage</div>
-            <div className="text-xl font-bold font-mono text-blue-400">{portfolioPct.toFixed(1)}%</div>
+          <div className="h-8 w-px bg-slate-800" />
+          <div>
+            <div className="text-[10px] uppercase font-semibold text-slate-400">Portfolio Coverage</div>
+            <div className="text-lg font-bold font-mono text-blue-400 mt-0.5">{portfolioPct.toFixed(1)}%</div>
           </div>
         </div>
       </div>
@@ -47,23 +50,25 @@ export const ARRWaterfall: React.FC<ARRWaterfallProps> = ({ opportunities, total
         {opportunities.map((opp, idx) => {
           const pct = totalDemanded > 0 ? (opp.total_arr_usd / totalDemanded) * 100 : 0
           return (
-            <div key={opp.id} className="space-y-1.5">
+            <div key={opp.id} className="space-y-2 group">
               <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 truncate max-w-md">
-                  <span className="font-mono text-[#64748b] text-[11px]">#{idx + 1}</span>
-                  <span className="font-medium text-slate-200 truncate">{opp.title}</span>
-                  <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#1e293b] text-slate-300">
+                <div className="flex items-center gap-2.5 truncate max-w-xl">
+                  <span className="font-mono text-slate-500 font-bold text-xs">#{String(idx + 1).padStart(2, '0')}</span>
+                  <span className="font-semibold text-white truncate text-sm group-hover:text-blue-400 transition-colors">
+                    {opp.title}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-800/80 text-slate-300 border border-slate-700/50">
                     {opp.account_count} accounts
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs font-semibold text-emerald-400">{formatUSD(opp.total_arr_usd)}</span>
-                  <span className="font-mono text-[11px] text-[#64748b] w-12 text-right">{pct.toFixed(1)}%</span>
+                  <span className="font-mono text-sm font-bold text-emerald-400">{formatUSD(opp.total_arr_usd)}</span>
+                  <span className="font-mono text-xs font-semibold text-slate-400 w-12 text-right">{pct.toFixed(1)}%</span>
                 </div>
               </div>
-              <div className="w-full bg-[#1e293b] h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-800/50">
                 <div
-                  className="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-700 shadow-sm"
                   style={{ width: `${Math.max(pct, 2)}%` }}
                 />
               </div>
@@ -72,7 +77,7 @@ export const ARRWaterfall: React.FC<ARRWaterfallProps> = ({ opportunities, total
         })}
 
         {opportunities.length === 0 && (
-          <div className="text-center py-6 text-xs text-[#64748b]">
+          <div className="text-center py-8 text-xs text-slate-500">
             No opportunities synthesized yet. Run HDBSCAN clustering to rank customer demand.
           </div>
         )}
