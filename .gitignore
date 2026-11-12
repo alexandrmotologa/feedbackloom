@@ -6,7 +6,7 @@ build/
 *.dll
 *.so
 *.dylib
-feedbackloom
+/feedbackloom
 
 # Node build artifacts (except web/dist which is embedded in the Go binary)
 dist/
