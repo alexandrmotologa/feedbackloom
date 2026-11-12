@@ -1,0 +1,32 @@
+# Binaries and build artifacts
+bin/
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+feedbackloom
+
+# SQLite storage
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Environment and local configs
+.env
+.env.local
+.env.*.local
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
